@@ -50,7 +50,7 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 	contextDataVal := int(0)
 	contextDataPosition := int(0)
 
-	for ii := 0; ii < len(uncompressed); ii++ {
+	for ii := 0; ii < len([]rune(uncompressed)); ii++ {
 		contextC = string([]rune(uncompressed)[ii])
 		_, in := contextDictionary[contextC]
 		if !in {
