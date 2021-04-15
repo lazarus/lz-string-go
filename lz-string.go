@@ -14,11 +14,10 @@ func CompressToBase64(uncompressed string) string {
 	if len(uncompressed) == 0 {
 		return ""
 	}
-
+	charArr := []rune(keyStrBase64)
 	res := Compress(uncompressed, 6, func(character int) string {
-		return string([]rune(keyStrBase64)[character])
+		return string(charArr[character])
 	})
-
 	switch len(res) % 4 {
 	default:
 	case 0:
@@ -70,6 +69,7 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 	contextDictSize := int(3)
 	contextNumBits := int(2)
 	var contextDataString string
+
 	contextDataVal := int(0)
 	contextDataPosition := int(0)
 
@@ -89,7 +89,8 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 		} else {
 			_, in = contextDictionaryToCreate[contextW]
 			if in {
-				if []rune(contextW)[0] < 256 {
+				contextWRune := []rune(contextW)
+				if contextWRune[0] < 256 {
 					for i := 0; i < contextNumBits; i++ {
 						contextDataVal = contextDataVal << 1
 						if contextDataPosition == bitsPerChar-1 {
@@ -100,7 +101,7 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 							contextDataPosition++
 						}
 					}
-					value = int([]rune(contextW)[0])
+					value = int(contextWRune[0])
 					for i := 0; i < 8; i++ {
 						contextDataVal = (contextDataVal << 1) | (value & 1)
 						if contextDataPosition == bitsPerChar-1 {
@@ -125,7 +126,7 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 						}
 						value = 0
 					}
-					value = int([]rune(contextW)[0])
+					value = int(contextWRune[0])
 					for i := 0; i < 16; i++ {
 						contextDataVal = (contextDataVal << 1) | (value & 1)
 						if contextDataPosition == bitsPerChar-1 {
