@@ -33,6 +33,29 @@ func CompressToBase64(uncompressed string) string {
 	return res
 }
 
+func CompressFromString(uncompressed string, chars string) string {
+	if len(uncompressed) == 0 {
+		return ""
+	}
+	charArr := []rune(chars)
+	res := Compress(uncompressed, 6, func(character int) string {
+		return string(charArr[character])
+	})
+	//Padding
+	switch len(res) % 4 {
+	default:
+	case 0:
+		return res
+	case 1:
+		return res + "==="
+	case 2:
+		return res + "=="
+	case 3:
+		return res + "="
+	}
+	return res
+}
+
 func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(character int) string) string {
 	if len(uncompressed) == 0 {
 		return ""
@@ -50,17 +73,16 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 	contextDataVal := int(0)
 	contextDataPosition := int(0)
 
-	for ii := 0; ii < len([]rune(uncompressed)); ii++ {
-		contextC = string([]rune(uncompressed)[ii])
+	uncompressedRunes := []rune(uncompressed)
+	for ii := 0; ii < len(uncompressedRunes); ii++ {
+		contextC = string(uncompressedRunes[ii])
 		_, in := contextDictionary[contextC]
 		if !in {
 			contextDictionary[contextC] = contextDictSize
 			contextDictSize++
 			contextDictionaryToCreate[contextC] = true
 		}
-
 		contextWc = contextW + contextC
-
 		_, in = contextDictionary[contextWc]
 		if in {
 			contextW = contextWc
@@ -252,8 +274,7 @@ func Compress(uncompressed string, bitsPerChar int, getCharFromInt func(characte
 }
 
 // Decompress
-
-var keyStrBase64Map map[byte]int = map[byte]int{74: 9, 78: 13, 83: 18, 61: 64, 109: 38, 114: 43, 116: 45, 101: 30, 47: 63, 73: 8, 81: 16, 113: 42, 49: 53, 50: 54, 54: 58, 76: 11, 100: 29, 107: 36, 121: 50, 77: 12, 89: 24, 105: 34, 66: 1, 69: 4, 85: 20, 48: 52, 119: 48, 117: 46, 120: 49, 52: 56, 56: 60, 110: 39, 112: 41, 70: 5, 71: 6, 79: 14, 88: 23, 97: 26, 102: 31, 103: 32, 67: 2, 118: 47, 65: 0, 68: 3, 72: 7, 108: 37, 51: 55, 57: 61, 82: 17, 90: 25, 98: 27, 115: 44, 122: 51, 53: 57, 86: 21, 106: 35, 111: 40, 55: 59, 43: 62, 75: 10, 80: 15, 84: 19, 87: 22, 99: 28, 104: 33}
+var keyStrBase64Map = map[byte]int{74: 9, 78: 13, 83: 18, 61: 64, 109: 38, 114: 43, 116: 45, 101: 30, 47: 63, 73: 8, 81: 16, 113: 42, 49: 53, 50: 54, 54: 58, 76: 11, 100: 29, 107: 36, 121: 50, 77: 12, 89: 24, 105: 34, 66: 1, 69: 4, 85: 20, 48: 52, 119: 48, 117: 46, 120: 49, 52: 56, 56: 60, 110: 39, 112: 41, 70: 5, 71: 6, 79: 14, 88: 23, 97: 26, 102: 31, 103: 32, 67: 2, 118: 47, 65: 0, 68: 3, 72: 7, 108: 37, 51: 55, 57: 61, 82: 17, 90: 25, 98: 27, 115: 44, 122: 51, 53: 57, 86: 21, 106: 35, 111: 40, 55: 59, 43: 62, 75: 10, 80: 15, 84: 19, 87: 22, 99: 28, 104: 33}
 
 type dataStruct struct {
 	input      string
@@ -302,11 +323,11 @@ func getString(last string, data *dataStruct) (string, bool, error) {
 	c := readBits(data.numBits, data)
 	switch c {
 	case 0:
-		str := string(readBits(8, data))
+		str := string(rune(readBits(8, data)))
 		appendValue(data, str)
 		return str, false, nil
 	case 1:
-		str := string(readBits(16, data))
+		str := string(rune(readBits(16, data)))
 		appendValue(data, str)
 		return str, false, nil
 	case 2:
@@ -329,7 +350,6 @@ func concatWithFirstRune(str string, getFirstRune string) string {
 
 func DecompressFromBase64(input string) (string, error) {
 	data := dataStruct{input, getBaseValue(input[0]), 32, 1, []string{"0", "1", "2"}, 5, 2}
-
 	result, isEnd, err := getString("", &data)
 	if err != nil || isEnd {
 		return result, err
