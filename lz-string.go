@@ -7,40 +7,19 @@ import (
 )
 
 // Compress
+const _defaultKeyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
-var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-
-func CompressToBase64(uncompressed string) string {
+func CompressToBase64(uncompressed string, keyStrBase64 string) string {
 	if len(uncompressed) == 0 {
 		return ""
+	}
+	if keyStrBase64 == "" {
+		keyStrBase64 = _defaultKeyStrBase64
 	}
 	charArr := []rune(keyStrBase64)
 	res := Compress(uncompressed, 6, func(character int) string {
 		return string(charArr[character])
 	})
-	switch len(res) % 4 {
-	default:
-	case 0:
-		return res
-	case 1:
-		return res + "==="
-	case 2:
-		return res + "=="
-	case 3:
-		return res + "="
-	}
-	return res
-}
-
-func CompressFromString(uncompressed string, chars string) string {
-	if len(uncompressed) == 0 {
-		return ""
-	}
-	charArr := []rune(chars)
-	res := Compress(uncompressed, 6, func(character int) string {
-		return string(charArr[character])
-	})
-	//Padding
 	switch len(res) % 4 {
 	default:
 	case 0:
