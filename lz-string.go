@@ -9,6 +9,7 @@ import (
 )
 
 // Compress
+//goland:noinspection SpellCheckingInspection
 const _defaultKeyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
 func Compress(uncompressed string, keyStrBase64 string) string {
@@ -19,24 +20,19 @@ func Compress(uncompressed string, keyStrBase64 string) string {
 		keyStrBase64 = _defaultKeyStrBase64
 	}
 	charArr := []rune(keyStrBase64)
-	res := _compress(uncompressed, 6, func(character int) string {
-		return string(charArr[character])
-	})
+	res := _compress(uncompressed, 6, charArr)
 	switch len(res) % 4 {
-	default:
-	case 0:
-		return res
-	case 1:
-		return res + "==="
-	case 2:
-		return res + "=="
 	case 3:
 		return res + "="
+	case 2:
+		return res + "=="
+	case 1:
+		return res + "==="
 	}
 	return res
 }
 
-func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(character int) string) string {
+func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 	if len(uncompressed) == 0 {
 		return ""
 	}
@@ -47,17 +43,16 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 	var contextW string
 	var contextWc string
 	contextEnlargeIn := float64(2)
-	contextDictSize := int(3)
-	contextNumBits := int(2)
+	contextDictSize := 3
+	contextNumBits := 2
 	//var contextDataString string
 	var contextDataString = strings.Builder{}
 
-	contextDataVal := int(0)
-	contextDataPosition := int(0)
+	contextDataVal := 0
+	contextDataPosition := 0
 
-	uncompressedRunes := []rune(uncompressed)
-	for ii := 0; ii < len(uncompressedRunes); ii++ {
-		contextC = string(uncompressedRunes[ii])
+	for ii := 0; ii < len(uncompressed); ii++ {
+		contextC = string(uncompressed[ii])
 		_, in := contextDictionary[contextC]
 		if !in {
 			contextDictionary[contextC] = contextDictSize
@@ -71,26 +66,24 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 		} else {
 			_, in = contextDictionaryToCreate[contextW]
 			if in {
-				contextWRune := []rune(contextW)
-				if contextWRune[0] < 256 {
+				contextWRune := int(contextW[0])
+				if contextWRune < 256 {
 					for i := 0; i < contextNumBits; i++ {
 						contextDataVal = contextDataVal << 1
 						if contextDataPosition == bitsPerChar-1 {
 							contextDataPosition = 0
-							//contextDataString += getCharFromInt(contextDataVal)
-							contextDataString.WriteString(getCharFromInt(contextDataVal))
+							contextDataString.WriteRune(charArr[contextDataVal])
 							contextDataVal = 0
 						} else {
 							contextDataPosition++
 						}
 					}
-					value = int(contextWRune[0])
+					value = contextWRune
 					for i := 0; i < 8; i++ {
 						contextDataVal = (contextDataVal << 1) | (value & 1)
 						if contextDataPosition == bitsPerChar-1 {
 							contextDataPosition = 0
-							//contextDataString += getCharFromInt(contextDataVal)
-							contextDataString.WriteString(getCharFromInt(contextDataVal))
+							contextDataString.WriteRune(charArr[contextDataVal])
 							contextDataVal = 0
 						} else {
 							contextDataPosition++
@@ -103,21 +96,19 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 						contextDataVal = (contextDataVal << 1) | value
 						if contextDataPosition == bitsPerChar-1 {
 							contextDataPosition = 0
-							//contextDataString += getCharFromInt(contextDataVal)
-							contextDataString.WriteString(getCharFromInt(contextDataVal))
+							contextDataString.WriteRune(charArr[contextDataVal])
 							contextDataVal = 0
 						} else {
 							contextDataPosition++
 						}
 						value = 0
 					}
-					value = int(contextWRune[0])
+					value = contextWRune
 					for i := 0; i < 16; i++ {
 						contextDataVal = (contextDataVal << 1) | (value & 1)
 						if contextDataPosition == bitsPerChar-1 {
 							contextDataPosition = 0
-							//contextDataString += getCharFromInt(contextDataVal)
-							contextDataString.WriteString(getCharFromInt(contextDataVal))
+							contextDataString.WriteRune(charArr[contextDataVal])
 							contextDataVal = 0
 						} else {
 							contextDataPosition++
@@ -137,8 +128,7 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 					contextDataVal = (contextDataVal << 1) | (value & 1)
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
-						//contextDataString += getCharFromInt(contextDataVal)
-						contextDataString.WriteString(getCharFromInt(contextDataVal))
+						contextDataString.WriteRune(charArr[contextDataVal])
 						contextDataVal = 0
 					} else {
 						contextDataPosition++
@@ -160,25 +150,24 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 	if contextW != "" {
 		_, in := contextDictionaryToCreate[contextW]
 		if in {
-			if []rune(contextW)[0] < 256 {
+			contextWRune := int(contextW[0])
+			if contextWRune < 256 {
 				for i := 0; i < contextNumBits; i++ {
 					contextDataVal = contextDataVal << 1
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
-						//contextDataString += getCharFromInt(contextDataVal)
-						contextDataString.WriteString(getCharFromInt(contextDataVal))
+						contextDataString.WriteRune(charArr[contextDataVal])
 						contextDataVal = 0
 					} else {
 						contextDataPosition++
 					}
 				}
-				value = int([]rune(contextW)[0])
+				value = contextWRune
 				for i := 0; i < 8; i++ {
 					contextDataVal = (contextDataVal << 1) | (value & 1)
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
-						//contextDataString += getCharFromInt(contextDataVal)
-						contextDataString.WriteString(getCharFromInt(contextDataVal))
+						contextDataString.WriteRune(charArr[contextDataVal])
 						contextDataVal = 0
 					} else {
 						contextDataPosition++
@@ -191,21 +180,19 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 					contextDataVal = (contextDataVal << 1) | value
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
-						//contextDataString += getCharFromInt(contextDataVal)
-						contextDataString.WriteString(getCharFromInt(contextDataVal))
+						contextDataString.WriteRune(charArr[contextDataVal])
 						contextDataVal = 0
 					} else {
 						contextDataPosition++
 					}
 					value = 0
 				}
-				value = int([]rune(contextW)[0])
+				value = contextWRune
 				for i := 0; i < 16; i++ {
 					contextDataVal = (contextDataVal << 1) | (value & 1)
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
-						//contextDataString += getCharFromInt(contextDataVal)
-						contextDataString.WriteString(getCharFromInt(contextDataVal))
+						contextDataString.WriteRune(charArr[contextDataVal])
 						contextDataVal = 0
 					} else {
 						contextDataPosition++
@@ -225,8 +212,7 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 				contextDataVal = (contextDataVal << 1) | (value & 1)
 				if contextDataPosition == bitsPerChar-1 {
 					contextDataPosition = 0
-					//contextDataString += getCharFromInt(contextDataVal)
-					contextDataString.WriteString(getCharFromInt(contextDataVal))
+					contextDataString.WriteRune(charArr[contextDataVal])
 					contextDataVal = 0
 				} else {
 					contextDataPosition++
@@ -246,8 +232,7 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 		contextDataVal = (contextDataVal << 1) | (value & 1)
 		if contextDataPosition == bitsPerChar-1 {
 			contextDataPosition = 0
-			//contextDataString += getCharFromInt(contextDataVal)
-			contextDataString.WriteString(getCharFromInt(contextDataVal))
+			contextDataString.WriteRune(charArr[contextDataVal])
 			contextDataVal = 0
 		} else {
 			contextDataPosition++
@@ -258,8 +243,7 @@ func _compress(uncompressed string, bitsPerChar int, getCharFromInt func(charact
 	for {
 		contextDataVal = contextDataVal << 1
 		if contextDataPosition == bitsPerChar-1 {
-			//contextDataString += getCharFromInt(contextDataVal)
-			contextDataString.WriteString(getCharFromInt(contextDataVal))
+			contextDataString.WriteRune(charArr[contextDataVal])
 			break
 		} else {
 			contextDataPosition++
@@ -382,23 +366,3 @@ func Decompress(input string, keyStrBase64 string) (string, error) {
 		last = str
 	}
 }
-
-//func DecompressFromBase64New(input string) (string, error) {
-//	data := dataStruct{input, getBaseValue(input[0]), 32, 1, []string{"0", "1", "2"}, 5, 2}
-//	result, isEnd, err := getString("", &data)
-//	if err != nil || isEnd {
-//		return result, err
-//	}
-//	last := result
-//	data.numBits += 1
-//	newResBuf := strings.Builder{}
-//	for {
-//		str, isEnd, err := getString(last, &data)
-//		if err != nil || isEnd {
-//			return newResBuf.String(), err
-//		}
-//		newResBuf.WriteString(str)
-//		appendValue(&data, concatWithFirstRune(last, str))
-//		last = str
-//	}
-//}
