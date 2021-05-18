@@ -58,22 +58,22 @@ func TestCompressFromString(t *testing.T) {
 }
 
 func Test_Integrity(t *testing.T) {
-	start_string := "Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives."
-	compressed := Compress(start_string, _defaultKeyStrBase64)
+	startString := "Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives."
+	compressed := Compress(startString, _defaultKeyStrBase64)
 	decompress, err := Decompress(compressed, _defaultKeyStrBase64)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if decompress != start_string {
-		t.Fatalf("Decompress() = %s; want %s", decompress, start_string)
+	if decompress != startString {
+		t.Fatalf("Decompress() = %s; want %s", decompress, startString)
 	}
-	should_be := "OIewBAlgzmCGYDsCmB3MAbWCDmBXW2SAdGAILoAuAFiLtlZBWAEYgBObIKMEAJkrBgAzTgFswSAB7QKEHBix4CSKABpGYKoLC4EuKPnRgADp2NI2slWGqwmo2AGskEoUKQBjWQDcXoE5zYbLCiMLwQbhZICExyYB5awV4WYCIg4qYgQSEwKGwQFBTRkAiMMGxImD4qREA==="
-	should_be_decompressed, err := Decompress(should_be, _defaultKeyStrBase64)
+	shouldBe := "OIewBAlgzmCGYDsCmB3MAbWCDmBXW2SAdGAILoAuAFiLtlZBWAEYgBObIKMEAJkrBgAzTgFswSAB7QKEHBix4CSKABpGYKoLC4EuKPnRgADp2NI2slWGqwmo2AGskEoUKQBjWQDcXoE5zYbLCiMLwQbhZICExyYB5awV4WYCIg4qYgQSEwKGwQFBTRkAiMMGxImD4qREA==="
+	shouldBeDecompressed, err := Decompress(shouldBe, _defaultKeyStrBase64)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if should_be_decompressed != start_string {
-		t.Fatalf("Decompress() = %s; want %s", should_be_decompressed, start_string)
+	if shouldBeDecompressed != startString {
+		t.Fatalf("Decompress() = %s; want %s", shouldBeDecompressed, startString)
 	}
 	return
 }
