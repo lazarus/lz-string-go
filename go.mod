@@ -1,3 +1,3 @@
-module github.com/austinh115/lz-string-go
+module github.com/Lazarus/lz-string-go
 
 go 1.16
