@@ -1,4 +1,4 @@
-package LZString
+package lzstring
 
 import (
 	"errors"
@@ -69,7 +69,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 				contextWRune := int(contextW[0])
 				if contextWRune < 256 {
 					for i := 0; i < contextNumBits; i++ {
-						contextDataVal = contextDataVal << 1
+						contextDataVal <<= 1
 						if contextDataPosition == bitsPerChar-1 {
 							contextDataPosition = 0
 							contextDataString.WriteRune(charArr[contextDataVal])
@@ -88,7 +88,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 						} else {
 							contextDataPosition++
 						}
-						value = value >> 1
+						value >>= 1
 					}
 				} else {
 					value = 1
@@ -113,7 +113,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 						} else {
 							contextDataPosition++
 						}
-						value = value >> 1
+						value >>= 1
 					}
 				}
 				contextEnlargeIn--
@@ -133,7 +133,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 					} else {
 						contextDataPosition++
 					}
-					value = value >> 1
+					value >>= 1
 				}
 			}
 			contextEnlargeIn--
@@ -153,7 +153,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 			contextWRune := int(contextW[0])
 			if contextWRune < 256 {
 				for i := 0; i < contextNumBits; i++ {
-					contextDataVal = contextDataVal << 1
+					contextDataVal <<= 1
 					if contextDataPosition == bitsPerChar-1 {
 						contextDataPosition = 0
 						contextDataString.WriteRune(charArr[contextDataVal])
@@ -172,7 +172,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 					} else {
 						contextDataPosition++
 					}
-					value = value >> 1
+					value >>= 1
 				}
 			} else {
 				value = 1
@@ -197,7 +197,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 					} else {
 						contextDataPosition++
 					}
-					value = value >> 1
+					value >>= 1
 				}
 			}
 			contextEnlargeIn--
@@ -217,7 +217,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 				} else {
 					contextDataPosition++
 				}
-				value = value >> 1
+				value >>= 1
 			}
 		}
 		contextEnlargeIn--
@@ -237,11 +237,11 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 		} else {
 			contextDataPosition++
 		}
-		value = value >> 1
+		value >>= 1
 	}
 
 	for {
-		contextDataVal = contextDataVal << 1
+		contextDataVal <<= 1
 		if contextDataPosition == bitsPerChar-1 {
 			contextDataString.WriteRune(charArr[contextDataVal])
 			break
@@ -293,11 +293,11 @@ func readBits(nb int, data *dataStruct) int {
 	power := 1
 	for i := 0; i < nb; i++ {
 		respB := data.val & data.position
-		data.position = data.position / 2
+		data.position /= 2
 		if data.position == 0 {
 			data.position = 32
 			data.val = getBaseValue(data.alphabet, data.input[data.index])
-			data.index += 1
+			data.index++
 		}
 		if respB > 0 {
 			result |= power
@@ -309,10 +309,10 @@ func readBits(nb int, data *dataStruct) int {
 
 func appendValue(data *dataStruct, str string) {
 	data.dictionary = append(data.dictionary, str)
-	data.enlargeIn -= 1
+	data.enlargeIn--
 	if data.enlargeIn == 0 {
 		data.enlargeIn = math.Pow(2, float64(data.numBits))
-		data.numBits += 1
+		data.numBits++
 	}
 }
 
@@ -355,13 +355,13 @@ func Decompress(input string, keyStrBase64 string) (string, error) {
 		return result, err
 	}
 	last := result
-	data.numBits += 1
+	data.numBits++
 	for {
 		str, isEnd, err := getString(last, &data)
 		if err != nil || isEnd {
 			return result, err
 		}
-		result = result + str
+		result += str
 		appendValue(&data, concatWithFirstRune(last, str))
 		last = str
 	}
