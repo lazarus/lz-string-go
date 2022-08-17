@@ -20,7 +20,7 @@ func Compress(uncompressed string, keyStrBase64 string) string {
 		keyStrBase64 = _defaultKeyStrBase64
 	}
 	charArr := []rune(keyStrBase64)
-	res := _compress(uncompressed, 6, charArr)
+	res := _compress([]rune(uncompressed), 6, charArr)
 	switch len(res) % 4 {
 	case 3:
 		return res + "="
@@ -32,7 +32,7 @@ func Compress(uncompressed string, keyStrBase64 string) string {
 	return res
 }
 
-func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
+func _compress(uncompressed []rune, bitsPerChar int, charArr []rune) string {
 	if len(uncompressed) == 0 {
 		return ""
 	}
@@ -42,7 +42,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 	var contextC string
 	var contextW string
 	var contextWc string
-	contextEnlargeIn := float64(2)
+	contextEnlargeIn := int64(2)
 	contextDictSize := 3
 	contextNumBits := 2
 	//var contextDataString string
@@ -66,7 +66,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 		} else {
 			_, in = contextDictionaryToCreate[contextW]
 			if in {
-				contextWRune := int(contextW[0])
+				contextWRune := int([]rune(contextW)[0])
 				if contextWRune < 256 {
 					for i := 0; i < contextNumBits; i++ {
 						contextDataVal = contextDataVal << 1
@@ -118,7 +118,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 				}
 				contextEnlargeIn--
 				if contextEnlargeIn == 0 {
-					contextEnlargeIn = math.Pow(2, float64(contextNumBits))
+					contextEnlargeIn = int64(math.Pow(2, float64(contextNumBits)))
 					contextNumBits++
 				}
 				delete(contextDictionaryToCreate, contextW)
@@ -138,7 +138,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 			}
 			contextEnlargeIn--
 			if contextEnlargeIn == 0 {
-				contextEnlargeIn = math.Pow(2, float64(contextNumBits))
+				contextEnlargeIn = int64(math.Pow(2, float64(contextNumBits)))
 				contextNumBits++
 			}
 			contextDictionary[contextWc] = contextDictSize
@@ -150,7 +150,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 	if contextW != "" {
 		_, in := contextDictionaryToCreate[contextW]
 		if in {
-			contextWRune := int(contextW[0])
+			contextWRune := int([]rune(contextW)[0])
 			if contextWRune < 256 {
 				for i := 0; i < contextNumBits; i++ {
 					contextDataVal = contextDataVal << 1
@@ -202,7 +202,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 			}
 			contextEnlargeIn--
 			if contextEnlargeIn == 0 {
-				contextEnlargeIn = math.Pow(2, float64(contextNumBits))
+				contextEnlargeIn = int64(math.Pow(2, float64(contextNumBits)))
 				contextNumBits++
 			}
 			delete(contextDictionaryToCreate, contextW)
@@ -222,7 +222,7 @@ func _compress(uncompressed string, bitsPerChar int, charArr []rune) string {
 		}
 		contextEnlargeIn--
 		if contextEnlargeIn == 0 {
-			contextEnlargeIn = math.Pow(2, float64(contextNumBits))
+			contextEnlargeIn = int64(math.Pow(2, float64(contextNumBits)))
 			contextNumBits++
 		}
 	}
