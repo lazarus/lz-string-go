@@ -57,6 +57,18 @@ func TestCompressFromString(t *testing.T) {
 	}
 }
 
+func Test_ChineseIntegrity(t *testing.T) {
+	var dataStr = "这是一个中文文本测试试,haha~"
+	cstr := Compress(dataStr, "")
+	dstr, err := Decompress(cstr, "")
+	if err != nil {
+		t.Fatal("err", err)
+	}
+	if dstr != dataStr {
+		t.Errorf("ChineseIntegrity() = %v, want %v", dstr, dataStr)
+	}
+}
+
 func Test_Integrity(t *testing.T) {
 	startString := "Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives."
 	compressed := Compress(startString, _defaultKeyStrBase64)
@@ -135,15 +147,4 @@ func BenchmarkDecompressFromBase64old(b *testing.B) {
 		}()
 	}
 	wg.Wait()
-}
-
-func Test_CompressChinese(t *testing.T) {
-	var dataStr = "这是一个中文文本测试试,haha~"
-	cstr := Compress(dataStr, "")
-	fmt.Println("cstr", cstr)
-	dstr, err := Decompress(cstr, "")
-	if err != nil {
-		fmt.Println("err", err)
-	}
-	fmt.Println("dstr", dstr)
 }
