@@ -137,3 +137,14 @@ func BenchmarkDecompressFromBase64old(b *testing.B) {
 	}
 	wg.Wait()
 }
+
+func Test_CompressChinese(t *testing.T) {
+	var dataStr = "这是一个中文文本测试试,haha~"
+	cstr := Compress(dataStr, "")
+	fmt.Println("cstr", cstr)
+	dstr, err := Decompress(cstr, "")
+	if err != nil {
+		fmt.Println("err", err)
+	}
+	fmt.Println("dstr", dstr)
+}
